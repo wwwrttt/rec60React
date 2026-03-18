@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Routes, Route, Link } from "react-router";
-import { useRecipes } from "./RecipeContext";
+import { useRecipes } from "./hooks/useRecipes";
 import ListView from "./views/listView";
 import "tailwindcss";
 import './App.css'
@@ -8,9 +8,10 @@ import RecipeView from "./views/recipeView";
 
 export default function App() {
     const nav = useNavigate(),
-        recipes = useRecipes(),
+        { recipes, loading } = useRecipes(),
         [query, setQuery] = useState("");
 
+    if (loading) return (<div className="text-lg">Loading recipes...</div>)
 
     const handleSearchChange = (e) => {
         setQuery(e.target.value);
@@ -19,14 +20,8 @@ export default function App() {
 
     const handleSearchKeyDown = (e) => {
         if (e.key === "Enter") {
-            handleClick();
+            handleSearchChange();
         }
-    }
-
-    if (!recipes) {
-        return (
-            <div>Loading recipes...</div>
-        )
     }
 
     return (
