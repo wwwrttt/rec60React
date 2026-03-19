@@ -1,23 +1,22 @@
-import { useParams } from "react-router";
+import { useParams, useNavigate } from "react-router";
 import { useRecipes } from "../hooks/useRecipes";
-import { useNavigate } from "react-router";
 
 export default function RecipeView() {
-    const params = useParams();
-    const { recipes, loading, error, deleteRecipe } = useRecipes();
+    const { id } = useParams();
+    const { recipes, deleteRecipe } = useRecipes();
     const nav = useNavigate();
 
-    if (loading) { return (<div className="txt-lg">Still loading recipes...</div>) }
-    if (error) { return (<div className="txt-lg">Error... {error}</div>) }
+    const recipe = recipes.find((r) => { return r._id === id })
+    if (!recipe) return (<div className="text-xl text-red-500 mt-6 ml-2">The requested recipe could be found.</div>)
 
-    let uid = 0;
     const toHtml = (raw) => {
         let lines = raw.split("\n");
+        let uid = 0;
 
         return (
-            lines.map((l) => {
-                return (<div key={uid++}>{l}<br /></div>)
-            })
+            <div style={{ qqqfontFamily: "monospace" }}>
+                {lines.map((l) => { return (<div key={uid++}>{l}<br /></div>) })}
+            </div >
         )
     }
 
@@ -30,14 +29,15 @@ export default function RecipeView() {
 
     window.scrollTo(0, 0);
 
-    const recipe = recipes.find((r) => { return r._id === params.id })
-
-    if (!recipe) return (<div className="text-xl text-red-500 mt-6 ml-2">The requested recipe could be found.</div>)
     return (
-        <div className="m-3 max-w-150">
-            <div className="mb-4 text-xl p-2">
-                {recipe.name} <div className="inline-block"><button className="border rounded-lg p-1 ml-5" onClick={() => handleDelete(recipe._id)}>Delete</button></div>
+        <div className="m-3 max-w-150 select-none" onClick={() => nav("/edit/" + id)}>
+            <div className="mb-4 text-xl p-2 inline-block">
+                {recipe.name}
             </div>
+            <div className="float-right">
+                <button className="border rounded-lg p-2 ml-5" onClick={() => handleDelete(recipe._id)}>Delete</button>
+            </div>
+
             <div className="mb-4 border-1 p-2 border-gray-700 rounded-lg">
                 {toHtml(recipe.ingredients)}
             </div>
@@ -59,6 +59,6 @@ export default function RecipeView() {
                     {recipe.category}
                 </div>
             }
-        </div >
+        </div>
     );
 }

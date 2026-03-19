@@ -1,5 +1,11 @@
 import { create } from 'zustand';
 
+const sortRecipes = (r1, r2) => {
+    if (!r1?.name || !r2?.name) return 0;
+
+    return r1.name.toLowerCase().trim().localeCompare(r2.name.toLowerCase().trim());
+};
+
 export const useRecipeStore = create((set, get) => ({
     recipes: [],
     pagination: null,
@@ -41,7 +47,7 @@ export const useRecipeStore = create((set, get) => ({
         if (!res.ok) throw new Error(data.message);
 
         set(state => ({
-            recipes: [data.data, ...state.recipes]
+            recipes: ([data.data, ...state.recipes].sort(sortRecipes))
         }));
 
         return data.data;
@@ -59,9 +65,9 @@ export const useRecipeStore = create((set, get) => ({
         if (!res.ok) throw new Error(data.message);
 
         set(state => ({
-            recipes: state.recipes.map(r =>
-                r._id === id ? data.data : r
-            )
+            recipes: state.recipes
+                .map(r => r._id === id ? data.data : r)
+                .sort(sortRecipes)
         }));
 
         return data.data;

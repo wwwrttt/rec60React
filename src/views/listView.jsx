@@ -1,8 +1,8 @@
 import { useParams, Link } from "react-router";
 
 export default function ListView({ recipes }) {
-    const params = useParams(),
-        compQuery = params.q?.toLowerCase();
+    const { query } = useParams(),
+        compQuery = query?.toLowerCase().trim();
 
     const highlightMatches = (raw) => {
         if (!compQuery) {
