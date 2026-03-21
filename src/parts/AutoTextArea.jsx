@@ -28,7 +28,7 @@ export default function AutoTextarea({
                 onChange?.(e);
                 resize();
             }}
-            className={`resize-none overflow-hidden qqqmin-h-[80px] transition-all duration-100 ease-in-out ${className}`}
+            className={`resize-none overflow-hidden transition-all duration-100 ease-in-out ${className}`}
             {...props}
         />
     );

@@ -2,11 +2,12 @@ import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router";
 import { useRecipes } from "../hooks/useRecipes";
 import { useDebounce } from "../hooks/useDebounce";
-import AutoTextarea from "../parts/AutoTextArea.jsx";
+import AutoTextarea from "../parts/AutoTextArea";
+import ComboBox from "../parts/ComboBox";
 
 export default function RecipeEdit() {
     const { id } = useParams();
-    const { recipes, createRecipe, updateRecipe, deleteRecipe } = useRecipes();
+    const { recipes, authors, categories, createRecipe, updateRecipe, deleteRecipe } = useRecipes();
     const [recId, setRecId] = useState(id ?? null);
     const [form, setForm] = useState({
         name: "",
@@ -63,15 +64,19 @@ export default function RecipeEdit() {
         save();
     }, [debouncedForm, isDirty, recId, setRecId, createRecipe, updateRecipe, nav]);
 
+    if (recId && !form.name) return;
+
     const updateField = (field) => (e) => {
-        setForm(prev => ({
-            ...prev,
-            [field]: e.target.value
-        }));
+        updateNamedValue(field, e.target.value);
+    };
+
+    const updateNamedValue = (name, value) => {
+        setForm(prev => ({ ...prev, [name]: value }));
     };
 
     const handleDelete = (id) => {
         if (window.confirm("Are you sure you want to permenently delete this recipe?")) {
+            updateNamedValue("name", "");
             deleteRecipe(id);
             nav("/");
         }
@@ -80,39 +85,43 @@ export default function RecipeEdit() {
     window.scrollTo(0, 0);
 
     return (
-        <div className="m-3 max-w-150">
+        <div className="mt-3 max-w-150">
             <input
-                className="w-full mb-4 text-xl border-1 p-2 border-gray-700 rounded-lg"
-                placeholder="recipe name..."
+                className="w-full mb-5 text-xl border-1 p-2 border-gray-700 rounded-lg"
+                placeholder="recipe name"
                 value={form.name}
                 onChange={updateField("name")}
             />
 
             <AutoTextarea
                 className="w-full mb-4 border-1 p-2 border-gray-700 rounded-lg"
-                placeholder="ingredients..."
+                placeholder="ingredients"
                 value={form.ingredients}
                 onChange={updateField("ingredients")}
             />
 
             <AutoTextarea
                 className="w-full mb-4 border-1 p-2 border-gray-700 rounded-lg"
-                placeholder="directions..."
+                placeholder="directions"
                 value={form.directions}
                 onChange={updateField("directions")}
             />
 
-            <input
-                className="mb-4 px-4 py-2 border-1 border-gray-700 rounded-lg inline-block"
-                placeholder="author..."
+            <ComboBox
                 value={form.author}
-                onChange={updateField("author")}
+                options={authors}
+                placeholder="author"
+                className="mb-4 mr-4 inline-block form-input"
+                onChange={(val) => updateNamedValue('author', val)}
             />
-            <input
-                className="mb-4 ml-4 px-4 py-2 border-1 border-gray-700 rounded-lg inline-block"
-                placeholder="category..."
+
+            <ComboBox
                 value={form.category}
-                onChange={updateField("category")}
+                options={categories}
+                placeholder="category"
+                className="mb-4 mr-4 inline-block form-input"
+                onChange={(val) => updateNamedValue('category', val)}
+                typeAhead={true}
             />
 
             {recId &&
@@ -120,7 +129,6 @@ export default function RecipeEdit() {
                     <button className="border rounded-lg p-2" onClick={() => handleDelete(recId)}>Delete</button>
                 </div>
             }
-
         </div>
     );
 }

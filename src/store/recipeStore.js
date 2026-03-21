@@ -1,13 +1,52 @@
 import { create } from 'zustand';
 
+const normalizeText = (str) =>
+    (str || '').replace(/\r\n/g, '\n').trim();
+
+const normalizeKey = (str) =>
+    normalizeText(str).toLowerCase();
+
+const normalizeRecipe = (r) => {
+    return {
+        ...r,
+        name: normalizeText(r.name),
+        ingredients: normalizeText(r.ingredients),
+        directions: normalizeText(r.directions),
+        author: normalizeText(r.author),
+        category: normalizeText(r.category)
+    }
+}
+
+// Deduplicate + preserve original casing of first occurrence
+const extractUnique = (recipes, field) => {
+    const map = new Map();
+
+    recipes.forEach((r) => {
+        const raw = normalizeText(r[field]);
+        if (!raw) return;
+
+        const key = normalizeKey(raw);
+        if (!map.has(key)) {
+            map.set(key, raw);
+        }
+    });
+
+    return Array.from(map.values()).sort((a, b) =>
+        a.localeCompare(b)
+    );
+};
+
 const sortRecipes = (r1, r2) => {
     if (!r1?.name || !r2?.name) return 0;
 
     return r1.name.toLowerCase().trim().localeCompare(r2.name.toLowerCase().trim());
 };
 
+
 export const useRecipeStore = create((set, get) => ({
     recipes: [],
+    authors: [],
+    categories: [],
     pagination: null,
     loading: false,
     error: null,
@@ -25,8 +64,12 @@ export const useRecipeStore = create((set, get) => ({
 
             if (!res.ok) throw new Error(data.message);
 
+            const normalized = data.data.map((r) => (normalizeRecipe(r)));
+
             set({
-                recipes: data.data,
+                recipes: normalized,
+                authors: extractUnique(normalized, 'author'),
+                categories: extractUnique(normalized, 'category'),
                 pagination: data.pagination,
                 loading: false
             });
@@ -46,9 +89,15 @@ export const useRecipeStore = create((set, get) => ({
         const data = await res.json();
         if (!res.ok) throw new Error(data.message);
 
-        set(state => ({
-            recipes: ([data.data, ...state.recipes].sort(sortRecipes))
-        }));
+        set(state => {
+            const recipes = ([data.data, ...state.recipes].sort(sortRecipes));
+
+            return {
+                recipes,
+                authors: extractUnique(recipes, 'author'),
+                categories: extractUnique(recipes, 'category'),
+            };
+        });
 
         return data.data;
     },
@@ -64,23 +113,35 @@ export const useRecipeStore = create((set, get) => ({
         const data = await res.json();
         if (!res.ok) throw new Error(data.message);
 
-        set(state => ({
-            recipes: state.recipes
+        set(state => {
+            const recipes = state.recipes
                 .map(r => r._id === id ? data.data : r)
                 .sort(sortRecipes)
-        }));
+
+            return {
+                recipes,
+                authors: extractUnique(recipes, 'author'),
+                categories: extractUnique(recipes, 'category'),
+            };
+        });
 
         return data.data;
     },
 
     // --- Delete (optimistic)
     deleteRecipe: async (id) => {
-        const prev = get().recipes;
+        const prev = get();
 
         // optimistic update
-        set(state => ({
-            recipes: state.recipes.filter(r => r._id !== id)
-        }));
+        set(state => {
+            const recipes = state.recipes.filter(r => r._id !== id)
+
+            return {
+                recipes,
+                authors: extractUnique(recipes, 'author'),
+                categories: extractUnique(recipes, 'category'),
+            };
+        });
 
         try {
             const res = await fetch(`/api/recipes/${id}`, {
@@ -92,7 +153,11 @@ export const useRecipeStore = create((set, get) => ({
 
         } catch (err) {
             // rollback
-            set({ recipes: prev });
+            set({
+                recipes: prev.recipes,
+                authors: prev.authors,
+                categories: prev.categories
+            });
             throw err;
         }
     }

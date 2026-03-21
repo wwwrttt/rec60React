@@ -31,7 +31,7 @@ export default function ListView({ recipes }) {
     }
 
     return (
-        <div className="m-3">
+        <div className="mt-3 max-w-150">
 
             {compQuery &&
                 <>
@@ -45,11 +45,11 @@ export default function ListView({ recipes }) {
                 results.map((r) => {
                     return (
                         <Link key={r._id} className="" to={`/rec/${r._id}`}>
-                            <div className="text-sky-600 text-xl leading-8 ml-5">{highlightMatches(r.name)}</div>
+                            <div className="text-sky-600 text-xl leading-8">{highlightMatches(r.name)}</div>
                         </Link>
                     );
                 })
             }
-        </div >
+        </div>
     );
 }

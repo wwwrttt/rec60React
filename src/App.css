@@ -1,12 +1,31 @@
 @import "tailwindcss";
 
+:root {
+    --bg-body: #222222;
+    --border-input: #364153;
+}
+
 html {
     color-scheme: dark;
+}
+
+body {
+    background-color: var(--bg-body);
+}
+
+.form-input {
+    background-color: var(--bg-body);
+    border: 1px solid var(--border-input);
+    border-radius: .5rem;
+    padding: .5rem 1rem;
 }
 
 input:active,
 input:focus,
 input:focus-visible {
-    qqq-border: 0;
     outline: none;
+}
+
+.tmp-border {
+    border: 1px solid red;
 }
