@@ -1,9 +1,9 @@
 import { useParams, useNavigate } from "react-router";
-import { useRecipes } from "../hooks/useRecipes.js";
+import { useRecipeStore } from "../store/useRecipeStore.js";
 
 export default function RecipeView() {
     const { id } = useParams();
-    const { recipes } = useRecipes();
+    const { recipes } = useRecipeStore();
     const nav = useNavigate();
 
     if (!recipes || !recipes.length) return;
@@ -25,7 +25,7 @@ export default function RecipeView() {
     window.scrollTo(0, 0);
 
     return (
-        <div className="mt-3 max-w-150 select-none" onClick={() => nav("/edit/" + id)}>
+        <div className="mt-3 select-none" onClick={() => nav("/edit/" + id)}>
             <div className="mb-5 mt-2 ml-1 text-xl inline-block">
                 {recipe.name}
             </div>

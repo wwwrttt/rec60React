@@ -1,13 +1,13 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router";
-import { useRecipes } from "../hooks/useRecipes";
+import { useRecipeStore } from "../store/useRecipeStore";
 import { useDebounce } from "../hooks/useDebounce";
 import AutoTextarea from "../parts/AutoTextArea";
 import ComboBox from "../parts/ComboBox";
 
 export default function RecipeEdit() {
     const { id } = useParams();
-    const { recipes, authors, categories, createRecipe, updateRecipe, deleteRecipe } = useRecipes();
+    const { recipes, authors, categories, createRecipe, updateRecipe, deleteRecipe } = useRecipeStore();
     const [recId, setRecId] = useState(id ?? null);
     const [form, setForm] = useState({
         name: "",
@@ -85,7 +85,7 @@ export default function RecipeEdit() {
     window.scrollTo(0, 0);
 
     return (
-        <div className="mt-3 max-w-150">
+        <div className="mt-3">
             <input
                 className="w-full mb-5 text-xl border-1 p-2 border-gray-700 rounded-lg"
                 placeholder="recipe name"

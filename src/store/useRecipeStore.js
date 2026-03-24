@@ -48,23 +48,34 @@ export const useRecipeStore = create((set, get) => ({
     authors: [],
     categories: [],
     pagination: null,
+    authFetch: null,
     loading: false,
     error: null,
 
+    setAuthFetch: (authFetch) => set({ authFetch }),
+
     // --- Fetch
     fetchRecipes: async (params = {}) => {
+        const authFetch = get().authFetch;
+        if (!authFetch) throw new Error('Auth not initialized');
+
         if (get().loading) return;
 
         set({ loading: true, error: null });
 
         try {
             const query = new URLSearchParams(params).toString();
-            const res = await fetch(`/api/recipes?${query}`);
+            const res = await authFetch(`/api/recipes?${query}`);
+
+            if (res.status === 403) {
+                throw new Error("You do not have rights to be sniffing around here");
+            }
+
             const data = await res.json();
 
             if (!res.ok) throw new Error(data.message);
 
-            const normalized = data.data.map((r) => (normalizeRecipe(r)));
+            const normalized = data.data.map(normalizeRecipe);
 
             set({
                 recipes: normalized,
@@ -80,9 +91,11 @@ export const useRecipeStore = create((set, get) => ({
 
     // --- Create
     createRecipe: async (recipe) => {
-        const res = await fetch('/api/recipes', {
+        const authFetch = get().authFetch;
+        if (!authFetch) throw new Error('Auth not initialized');
+
+        const res = await authFetch('/api/recipes', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(recipe)
         });
 
@@ -90,7 +103,7 @@ export const useRecipeStore = create((set, get) => ({
         if (!res.ok) throw new Error(data.message);
 
         set(state => {
-            const recipes = ([data.data, ...state.recipes].sort(sortRecipes));
+            const recipes = [data.data, ...state.recipes].sort(sortRecipes);
 
             return {
                 recipes,
@@ -104,9 +117,11 @@ export const useRecipeStore = create((set, get) => ({
 
     // --- Update
     updateRecipe: async (id, updates) => {
-        const res = await fetch(`/api/recipes/${id}`, {
+        const authFetch = get().authFetch;
+        if (!authFetch) throw new Error('Auth not initialized');
+
+        const res = await authFetch(`/api/recipes/${id}`, {
             method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(updates)
         });
 
@@ -116,7 +131,7 @@ export const useRecipeStore = create((set, get) => ({
         set(state => {
             const recipes = state.recipes
                 .map(r => r._id === id ? data.data : r)
-                .sort(sortRecipes)
+                .sort(sortRecipes);
 
             return {
                 recipes,
@@ -131,10 +146,11 @@ export const useRecipeStore = create((set, get) => ({
     // --- Delete (optimistic)
     deleteRecipe: async (id) => {
         const prev = get();
+        const authFetch = prev.authFetch;
+        if (!authFetch) throw new Error('Auth not initialized');
 
-        // optimistic update
         set(state => {
-            const recipes = state.recipes.filter(r => r._id !== id)
+            const recipes = state.recipes.filter(r => r._id !== id);
 
             return {
                 recipes,
@@ -144,15 +160,16 @@ export const useRecipeStore = create((set, get) => ({
         });
 
         try {
-            const res = await fetch(`/api/recipes/${id}`, {
+            const res = await authFetch(`/api/recipes/${id}`, {
                 method: 'DELETE'
             });
 
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.message);
+            if (!res.ok) {
+                const data = await res.json();
+                throw new Error(data.message);
+            }
 
         } catch (err) {
-            // rollback
             set({
                 recipes: prev.recipes,
                 authors: prev.authors,

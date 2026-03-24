@@ -1,8 +1,12 @@
-import { useParams, Link } from "react-router";
+import { useParams, useNavigate, Link } from "react-router";
+import { useRecipeStore } from "../store/useRecipeStore";
+import FloatingActionButton from "../parts/FloatingActionButton";
 
-export default function ListView({ recipes }) {
-    const { query } = useParams(),
-        compQuery = query?.toLowerCase().trim();
+export default function ListView() {
+    const { query } = useParams();
+    const { recipes } = useRecipeStore();
+    const navigate = useNavigate();
+    const compQuery = query?.toLowerCase().trim();
 
     const highlightMatches = (raw) => {
         if (!compQuery) {
@@ -25,14 +29,18 @@ export default function ListView({ recipes }) {
     let results;
 
     if (compQuery) {
-        results = recipes.filter((r) => { return r.name.toLowerCase().indexOf(compQuery) >= 0 })
+        results = recipes.filter((r) => {
+            return (
+                r.name.toLowerCase().indexOf(compQuery) >= 0 ||
+                (r.ingredients && (r.ingredients?.toLowerCase().indexOf(compQuery) >= 0))
+            )
+        })
     } else {
         results = recipes;
     }
 
     return (
-        <div className="mt-3 max-w-150">
-
+        <div className="mt-3">
             {compQuery &&
                 <>
                     <div className="mb-4">
@@ -41,15 +49,16 @@ export default function ListView({ recipes }) {
                 </>
             }
 
-            {
-                results.map((r) => {
-                    return (
-                        <Link key={r._id} className="" to={`/rec/${r._id}`}>
-                            <div className="text-sky-600 text-xl leading-8">{highlightMatches(r.name)}</div>
-                        </Link>
-                    );
-                })
+            {results.map((r) => {
+                return (
+                    <Link key={r._id} className="" to={`/rec/${r._id}`}>
+                        <div className="text-sky-600 text-xl leading-8">{highlightMatches(r.name)}</div>
+                    </Link>
+                );
+            })
             }
+
+            <FloatingActionButton onClick={() => { navigate("/edit") }} />
         </div>
     );
 }
