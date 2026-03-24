@@ -60,18 +60,18 @@ export default function App() {
     }
 
     return (
-        <div className="m-2 max-w-150 relative">
-            <table>
+        <div className="m-2 sm:max-w-120 relative">
+            <table className="w-full">
                 <tbody>
                     <tr>
-                        <td className="">
+                        <td>
                             <Link to="/">
                                 <div className="border rounded-sm border-sky-700 mr-2 h-[45px] w-[45px] text-2xl font-bold flex items-center justify-center">
                                     <span className="-mt-[5px]">R</span>
                                 </div>
                             </Link>
                         </td>
-                        <td className="w-85 sm:w-100">
+                        <td className="w-full">
                             <input
                                 className="w-full border text-xl pl-2 pb-2 rounded-sm border-sky-700 focus:border-1 focus:border-sky-700 h-[45px]"
                                 type="text"
@@ -81,12 +81,8 @@ export default function App() {
                                 placeholder="Search"
                             />
                         </td>
-                        <td className="">
-                            <div
-                                onClick={() => navigate("/user")}
-                                className="ml-2 cursor-pointer absolute top-[2px] right-[.6rem]"
-                                title={user?.name}
-                            >
+                        <td>
+                            <div className="ml-2 cursor-pointer w-[45px]" title={user?.name} onClick={() => navigate("/user")}>
                                 {user?.picture &&
                                     <img src={user.picture}
                                         className="border rounded-full border-3 border-sky-700 h-[45px] w-[45px] text-2xl font-mono font-bold flex items-center justify-center cursor-pointer"

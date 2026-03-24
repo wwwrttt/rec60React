@@ -51,7 +51,7 @@ export default function ListView() {
 
             {results.map((r) => {
                 return (
-                    <Link key={r._id} className="" to={`/rec/${r._id}`}>
+                    <Link key={r._id} to={`/rec/${r._id}`}>
                         <div className="text-sky-600 text-xl leading-8">{highlightMatches(r.name)}</div>
                     </Link>
                 );
