@@ -1,15 +1,15 @@
-import { useAuth0 } from '@auth0/auth0-react';
+import { Navigate } from 'react-router';
+import { useAuthStore } from '../store/useAuthStore';
 
 export default function ProtectedRoute({ children }) {
-    const { isAuthenticated, isLoading, loginWithRedirect } = useAuth0();
+    const { isAuthenticated, isLoading, } = useAuthStore();
 
     if (isLoading) {
         return <div className="p-4">Loading...</div>;
     }
 
     if (!isAuthenticated) {
-        loginWithRedirect();
-        return null;
+        return (<Navigate to="/" replace />);
     }
 
     return children;

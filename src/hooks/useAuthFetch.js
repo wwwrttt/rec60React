@@ -1,12 +1,12 @@
 import { useAuth0 } from '@auth0/auth0-react';
+import { useAuthStore } from '../store/useAuthStore';
 
 export function useAuthFetch() {
-    const { getAccessTokenSilently, logout } = useAuth0();
+    const { logout } = useAuth0();
+    const token = useAuthStore(s => s.accessToken);
 
     const authFetch = async (url, options = {}) => {
         try {
-            const token = await getAccessTokenSilently();
-
             const res = await fetch(url, {
                 ...options,
                 headers: {

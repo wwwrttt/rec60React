@@ -13,7 +13,7 @@ export default function AuthProvider({ children }) {
                 redirect_uri: window.location.origin,
                 audience: import.meta.env.VITE_AUTH0_AUDIENCE,
             }}
-            cacheLocation="memory" // safest (no localStorage)
+            cacheLocation="localstorage"
             useRefreshTokens={true}
         >
             {children}
