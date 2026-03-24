@@ -51,8 +51,10 @@ export const useRecipeStore = create((set, get) => ({
     authFetch: null,
     loading: false,
     error: null,
+    pageUser: null,
 
     setAuthFetch: (authFetch) => set({ authFetch }),
+    setPageUser: (pageUser) => set({ pageUser }),
 
     // --- Fetch
     fetchRecipes: async (params = {}) => {
