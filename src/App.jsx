@@ -13,7 +13,7 @@ import './App.css'
 
 export default function App() {
     const { loginWithRedirect, logout } = useAuth0();
-    const { isAuthenticated, isLoading, user } = useAuthStore();
+    const { isAuthenticated, isLoading, error: authError, user } = useAuthStore();
     const navigate = useNavigate();
     const { recipes, fetchRecipes, loading, error } = useRecipeStore();
     const [query, setQuery] = useState("");
@@ -24,7 +24,13 @@ export default function App() {
         }
     }, [isAuthenticated, recipes, fetchRecipes]);
 
-    if (isLoading) return (<div className="text-lg">Starting up...</div>)
+    useEffect(() => {
+        if (authError) {
+            logout({ logoutParams: { returnTo: window.location.origin } });
+        }
+    }, [authError, logout]);
+
+    if (isLoading) return (<div className="text-lg" onClick={() => { logout({ logoutParams: { returnTo: window.location.origin } }); }}>Starting up...</div>)
 
     if (!isAuthenticated) {
         loginWithRedirect();
@@ -60,7 +66,7 @@ export default function App() {
     }
 
     return (
-        <div className="m-2 sm:max-w-120 relative">
+        <div className="m-2 sm:max-w-105 relative">
             <table className="w-full">
                 <tbody>
                     <tr>

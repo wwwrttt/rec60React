@@ -6,7 +6,7 @@ export default function FloatingActionButton({ onClick, title = "Add item", }) {
             aria-label={title}
             className="
                 fixed bottom-5
-                left-[min(26rem,calc(100vw-4.3rem))]
+                left-[min(23.3rem,calc(100vw-4rem))]
                 z-50
                 h-14 w-14
                 rounded-full
